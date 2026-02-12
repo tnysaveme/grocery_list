@@ -58,20 +58,22 @@ export async function GET() {
             try {
                 const id = uri.split(':').pop();
                 if (id) {
-                    console.log(`Fetching playlist: ${id}`);
+                    console.log(`Fetching playlist: ${id} (URI: ${uri})`);
                     const playlist = await spotifyApi.getPlaylist(id);
                     playlistMetadata[uri] = {
                         name: playlist.body.name,
                         image: playlist.body.images[0]?.url || null
                     };
+                    console.log(`Successfully fetched: ${playlist.body.name}`);
                 }
-            } catch (e) {
-                console.error(`Failed to fetch playlist ${uri}`, e);
-                // Fallback for debugging - remove in production if not needed
-                // playlistMetadata[uri] = {
-                //     name: `Error: ${uri.split(':').pop()}`,
-                //     image: null
-                // };
+            } catch (e: any) {
+                console.error(`Failed to fetch playlist ${uri}:`, e?.message || e);
+                console.error('Full error:', e);
+                // Add fallback with error info for debugging
+                playlistMetadata[uri] = {
+                    name: `[Error fetching playlist]`,
+                    image: null
+                };
             }
         }
 
