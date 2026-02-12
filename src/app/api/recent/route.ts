@@ -52,12 +52,13 @@ export async function GET() {
 
         const playlistMetadata: Record<string, { name: string; image: string | null }> = {};
 
-        // Fetch playlist details in parallel
-        // Note: We should ideally batch or limit concurrency but for <10 playlists it's fine
-        await Promise.all(Array.from(playlistUris).map(async (uri) => {
+        // Fetch playlist details
+        // Fetch sequentially to avoid rate limits
+        for (const uri of Array.from(playlistUris)) {
             try {
                 const id = uri.split(':').pop();
                 if (id) {
+                    console.log(`Fetching playlist: ${id}`);
                     const playlist = await spotifyApi.getPlaylist(id);
                     playlistMetadata[uri] = {
                         name: playlist.body.name,
@@ -66,8 +67,15 @@ export async function GET() {
                 }
             } catch (e) {
                 console.error(`Failed to fetch playlist ${uri}`, e);
+                // Fallback for debugging - remove in production if not needed
+                // playlistMetadata[uri] = {
+                //     name: `Error: ${uri.split(':').pop()}`,
+                //     image: null
+                // };
             }
-        }));
+        }
+
+        console.log("Fetched playlists:", Object.keys(playlistMetadata));
 
         return NextResponse.json({
             items: historyItems,
