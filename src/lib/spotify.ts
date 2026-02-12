@@ -2,8 +2,10 @@ import SpotifyWebApi from 'spotify-web-api-node';
 
 const scopes = [
   'user-read-recently-played',
-  'user-read-playback-state', // optional, for currently playing
-].join(',');
+  'user-read-playback-state',
+  'playlist-read-private',
+  'playlist-read-collaborative',
+].join(' ');
 
 const params = {
   scope: scopes,
