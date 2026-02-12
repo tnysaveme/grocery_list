@@ -2,14 +2,14 @@ import { motion } from "framer-motion";
 import clsx from "clsx";
 
 interface ViewToggleProps {
-    view: "all" | "categorized";
-    setView: (view: "all" | "categorized") => void;
+    view: "all" | "categorised";
+    setView: (view: "all" | "categorised") => void;
 }
 
 export default function ViewToggle({ view, setView }: ViewToggleProps) {
     return (
         <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-full w-fit mx-auto mb-8 border border-transparent">
-            {["all", "categorized"].map((v) => (
+            {["all", "categorised"].map((v) => (
                 <button
                     key={v}
                     onClick={() => setView(v as any)}

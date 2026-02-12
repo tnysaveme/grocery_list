@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import TrackItem from "./TrackItem";
 import GroupContainer from "./GroupContainer";
@@ -12,35 +13,23 @@ interface PlayHistory {
     context: SpotifyApi.ContextObject | null;
 }
 
+const fetcher = (url: string) => fetch(url).then((res) => {
+    if (!res.ok) throw new Error("Failed to fetch");
+    return res.json();
+});
+
 export default function RecentList() {
-    const [tracks, setTracks] = useState<PlayHistory[]>([]);
-    const [playlists, setPlaylists] = useState<Record<string, { name: string; image: string | null }>>({});
-    const [loading, setLoading] = useState(true);
-    const [view, setView] = useState<"all" | "categorized">("all");
-    const [error, setError] = useState<string | null>(null);
+    const [view, setView] = useState<"all" | "categorised">("all");
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const res = await fetch("/api/recent");
-                if (!res.ok) {
-                    if (res.status === 401) throw new Error("Unauthorized");
-                    throw new Error("Failed to fetch");
-                }
-                const data = await res.json();
-                setTracks(data.items || []);
-                setPlaylists(data.playlists || {});
-            } catch (err) {
-                setError("Could not load tracks. Try reconnecting.");
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchData();
-    }, []);
+    const { data, error, isLoading } = useSWR("/api/recent", fetcher, {
+        refreshInterval: 30000, // Poll every 30 seconds
+        revalidateOnFocus: true,
+    });
 
-    if (loading) {
+    const tracks: PlayHistory[] = data?.items || [];
+    const playlists: Record<string, { name: string; image: string | null }> = data?.playlists || {};
+
+    if (isLoading) {
         return (
             <div className="w-full h-64 flex items-center justify-center">
                 <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
@@ -49,13 +38,10 @@ export default function RecentList() {
     }
 
     if (error) {
-        return <div className="text-center p-8 font-mono text-red-500">{error}</div>;
+        return <div className="text-center p-8 font-mono text-red-500">Could not load tracks.</div>;
     }
 
     // Grouping Logic
-    // 1. Identify groups by context.uri (or album.uri fallback)
-    // 2. Map groupKey -> Data (tracks, maxTimestamp, info)
-    // 3. Sort groups by maxTimestamp
     const groups: Record<string, {
         id: string;
         type: "album" | "playlist";
@@ -65,7 +51,7 @@ export default function RecentList() {
         items: PlayHistory[];
     }> = {};
 
-    if (view === "categorized") {
+    if (view === "categorised") {
         tracks.forEach((item) => {
             let key: string;
             let type: "album" | "playlist";
@@ -132,7 +118,7 @@ export default function RecentList() {
                     </motion.div>
                 ) : (
                     <motion.div
-                        key="categorized"
+                        key="categorised"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
