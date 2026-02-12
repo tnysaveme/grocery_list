@@ -13,7 +13,8 @@ interface PlayHistory {
     context: SpotifyApi.ContextObject | null;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => {
+const fetcher = (url: string) => fetch(url).then(async (res) => {
+    if (res.status === 401) throw { status: 401, message: "Unauthorized" };
     if (!res.ok) throw new Error("Failed to fetch");
     return res.json();
 });
@@ -38,7 +39,14 @@ export default function RecentList() {
     }
 
     if (error) {
-        return <div className="text-center p-8 font-mono text-red-500">Could not load tracks.</div>;
+        if (error.message.includes("401") || error.status === 401) {
+            return (
+                <div className="flex justify-center p-8">
+                    <p className="font-mono text-sm text-gray-500">Session expired. Please log in again.</p>
+                </div>
+            );
+        }
+        return <div className="text-center p-8 font-mono text-red-500">Could not load tracks. {error.message}</div>;
     }
 
     // Grouping Logic

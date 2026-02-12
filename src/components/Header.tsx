@@ -26,12 +26,12 @@ export default function Header() {
                 <div className="w-3 h-3 rounded-full bg-black animate-pulse shadow-[0_0_10px_rgba(0,0,0,0.2)]" />
                 <h1 className="text-sm font-bold tracking-wide uppercase">tny&apos;s grocery list</h1>
                 {isLoggedIn && (
-                    <a
-                        href="/api/logout"
+                    <button
+                        onClick={() => window.location.href = "/api/logout"}
                         className="ml-2 text-xs px-3 py-1 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
                     >
                         Logout
-                    </a>
+                    </button>
                 )}
             </div>
         </header>
