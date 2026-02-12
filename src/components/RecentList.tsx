@@ -52,6 +52,9 @@ export default function RecentList() {
     }> = {};
 
     if (view === "categorised") {
+        console.log("Playlists metadata received:", playlists);
+        console.log("Playlist URIs in metadata:", Object.keys(playlists));
+
         tracks.forEach((item) => {
             let key: string;
             let type: "album" | "playlist";
@@ -62,7 +65,9 @@ export default function RecentList() {
             if (item.context && item.context.type === "playlist") {
                 key = item.context.uri;
                 type = "playlist";
+                console.log(`Looking up playlist with URI: ${key}`);
                 const meta = playlists[key];
+                console.log(`Found metadata:`, meta);
                 title = meta?.name || "Playlist";
                 // Prefer playlist image, fallback to track album image
                 image = meta?.image || item.track.album.images[0]?.url;
