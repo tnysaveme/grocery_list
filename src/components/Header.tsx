@@ -10,8 +10,14 @@ export default function Header() {
     useEffect(() => {
         // Check if user is logged in by checking if we're on the main page and can fetch data
         fetch("/api/recent")
-            .then(res => setIsLoggedIn(res.ok))
-            .catch(() => setIsLoggedIn(false));
+            .then(res => {
+                // Only consider logged in if we get a 200 response
+                setIsLoggedIn(res.status === 200);
+            })
+            .catch(() => {
+                // On any error, assume not logged in
+                setIsLoggedIn(false);
+            });
     }, [pathname]);
 
     return (
